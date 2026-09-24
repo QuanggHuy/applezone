@@ -1,0 +1,38 @@
+@model IEnumerable<AppleZone.Models.Order>
+
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<h1>Đơn hàng của tôi</h1>
+
+@if (!Model.Any())
+{
+    <p>Bạn chưa có đơn hàng nào.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Ngày đặt</th>
+                <th>Trạng thái</th>
+                <th style="text-align:right;">Tổng tiền</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+@foreach (var order in Model)
+{
+        <tr>
+            <td>#@order.Id</td>
+            <td>@order.Date.ToString("dd/MM/yyyy HH:mm")</td>
+            <td>@order.Status</td>
+            <td style="text-align:right;">@order.OrderDetails.Sum(od => od.Quantity * od.Price * (1 - od.Discount)).ToString("C2")</td>
+            <td><a asp-action="Details" asp-route-id="@order.Id">Xem chi tiết</a></td>
+        </tr>
+}
+        </tbody>
+    </table>
+}

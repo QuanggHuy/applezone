@@ -1,0 +1,177 @@
+﻿@model AppleZone.Helper.Cart
+
+@{
+    ViewData["Title"] = "Your Cart";
+}
+
+<style>
+    /* Custom Styles for Cart Page */
+    h1.text-center.mb-4 {
+        font-family: 'Arial', sans-serif;
+        color: #2c3e50;
+        font-weight: bold;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #343a40;
+        font-weight: bold;
+        text-align: center;
+        font-size: 16px;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .table tfoot th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        font-size: 16px;
+        color: #343a40;
+    }
+
+    .table .text-right {
+        text-align: right;
+    }
+
+    .cart-thumb {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .quantity-input {
+        width: 70px;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .cart-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: stretch;
+    }
+
+    .btn-primary.update {
+        background-color: #3498db;
+        border-color: #2980b9;
+        font-weight: bold;
+    }
+
+        .btn-primary.update:hover {
+            background-color: #2980b9;
+            border-color: #1c6ea4;
+        }
+
+    .btn-danger {
+        font-weight: bold;
+    }
+</style>
+
+<h1 class="text-center mb-4">@ViewData["Title"]</h1>
+
+<form asp-action="Order" method="post">
+<div class="table-responsive">
+    <table class="table table-bordered align-middle">
+        <thead class="thead-light">
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th class="text-right">Quantity</th>
+                <th class="text-right">Old Price</th>
+                <th class="text-right">Discount</th>
+                <th class="text-right">New Price</th>
+                <th class="text-right">Amount</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.List.Values)
+            {
+                <tr>
+                    <td><img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/no-image.svg" : item.ImageUrl)" onerror="this.onerror=null;this.src='/images/no-image.svg';" class="cart-thumb"></td>
+                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Category)</td>
+                    <td class="text-right">
+                        <input type="number" min="1" id="quantity-@item.Id" name="quantities[@item.Id]" value="@item.Quantity" class="form-control quantity-input"
+                               data-price="@item.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                               data-discount="@item.Discount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                    </td>
+                    <td class="text-right">@item.Price.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                    <td class="text-right">@item.Discount.ToString("P0")</td>
+                    <td class="text-right" id="newprice-@item.Id">@item.NewPrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                    <td class="text-right" id="amount-@item.Id">@item.Amount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</td>
+                    <td>
+                        <div class="cart-actions">
+                            <button type="button" class="btn btn-primary update" data-id="@item.Id">Lưu</button>
+                            <a class="btn btn-danger" asp-action="Remove" asp-route-id="@item.Id">Remove</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="7" class="text-right">Total:</th>
+                <th class="text-right" id="cart-total">@Model.TotalAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</th>
+                <th>
+                    <div class="cart-actions">
+                        <a asp-action="Empty" class="btn btn-danger">Empty</a>
+                            <button type="submit" class="btn btn-success w-100">Đặt hàng</button>
+                    </div>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+</form>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+            function recalcRow(id) {
+                var input = $("#quantity-" + id);
+                var qty = parseInt(input.val(), 10);
+                if (isNaN(qty) || qty < 1) return;
+
+                var price = parseFloat(input.data("price"));
+                var discount = parseFloat(input.data("discount"));
+                var newPrice = price * (1 - discount);
+                var amount = qty * newPrice;
+
+                $("#newprice-" + id).text(usd.format(newPrice));
+                $("#amount-" + id).text(usd.format(amount));
+
+                var total = 0;
+                $(".quantity-input").each(function () {
+                    var q = parseInt($(this).val(), 10) || 0;
+                    var p = parseFloat($(this).data("price"));
+                    var d = parseFloat($(this).data("discount"));
+                    total += q * p * (1 - d);
+                });
+                $("#cart-total").text(usd.format(total));
+            }
+
+            // Cập nhật New Price / Amount / Total ngay khi gõ số lượng (chỉ tính hiển thị,
+            // giá trị thật vẫn nằm trong Session — bấm Update mới lưu lại)
+            $(".quantity-input").on("input", function () {
+                recalcRow($(this).attr("id").replace("quantity-", ""));
+            });
+
+            $(".update").click(function () {
+                var id = $(this).data("id");
+                var quantity = $("#quantity-" + id).val();
+                var url = `@Url.Action("Update", "Cart")/${id}?quantity=${quantity}`;
+                window.location.href = url;
+            });
+        });
+    </script>
+}

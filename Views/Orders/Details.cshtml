@@ -1,0 +1,57 @@
+@model AppleZone.Models.Order
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<h1>Đơn hàng #@Model.Id</h1>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<p>
+    Ngày đặt: @Model.Date.ToString("dd/MM/yyyy HH:mm")<br />
+    Trạng thái: <strong>@Model.Status</strong>
+</p>
+
+@if (Model.Status == OrderStatus.Pending)
+{
+    <form asp-action="Cancel" method="post" class="mb-3" onsubmit="return confirm('Xác nhận hủy đơn hàng này?');">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-outline-danger"><i class="bi bi-x-circle"></i> Hủy đơn</button>
+    </form>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th style="text-align:right;">Số lượng</th>
+            <th style="text-align:right;">Đơn giá</th>
+            <th style="text-align:right;">Giảm giá</th>
+            <th style="text-align:right;">Thành tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var od in Model.OrderDetails)
+{
+        <tr>
+            <td>@od.Product.Name</td>
+            <td style="text-align:right;">@od.Quantity</td>
+            <td style="text-align:right;">@od.Price.ToString("C2")</td>
+            <td style="text-align:right;">@od.Discount.ToString("P0")</td>
+            <td style="text-align:right;">@((od.Quantity * od.Price * (1 - od.Discount)).ToString("C2"))</td>
+        </tr>
+}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4" style="text-align:right;">Tổng cộng:</th>
+            <th style="text-align:right;">@Model.OrderDetails.Sum(od => od.Quantity * od.Price * (1 - od.Discount)).ToString("C2")</th>
+        </tr>
+    </tfoot>
+</table>
+
+<a asp-action="Index">Quay lại danh sách đơn hàng</a>
