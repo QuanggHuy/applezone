@@ -1,0 +1,53 @@
+@{
+    double sliderFromPrice = (double)(ViewBag.FilterInfo.FromPrice ?? 0);
+    double sliderToPrice = (double)(ViewBag.FilterInfo.ToPrice ?? 3000);
+    double sliderFromDiscount = (double)(ViewBag.FilterInfo.FromDiscount ?? 0) * 100;
+    double sliderToDiscount = (double)(ViewBag.FilterInfo.ToDiscount ?? 1) * 100;
+}
+<!-- The Modal -->
+<div class="modal" id="modalFilter">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form>
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="bi bi-funnel"></i> Bộ lọc nâng cao</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <input type="hidden" name="name" value="@ViewBag.FilterInfo.Name" />
+                    <div class="form-group">
+                        <label for="categoryId">Category:</label>
+                        <select id="categoryId" name="categoryId" class="form-control" asp-items="ViewBag.CategoryList">
+                            <option value="-1">--- All ---</option>
+                        </select>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Khoảng giá: <span id="priceRangeLabel"></span></label><br />
+                        <input id="priceSlider" type="text"
+                               data-slider-min="0" data-slider-max="3000" data-slider-step="10"
+                               data-slider-value="[@sliderFromPrice.ToString(System.Globalization.CultureInfo.InvariantCulture),@sliderToPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)]" />
+                        <input type="hidden" id="fromPrice" name="fromPrice" value="@ViewBag.FilterInfo.FromPrice" />
+                        <input type="hidden" id="toPrice" name="toPrice" value="@ViewBag.FilterInfo.ToPrice" />
+                    </div>
+                    <div class="form-group mt-4">
+                        <label>Khoảng giảm giá: <span id="discountRangeLabel"></span></label><br />
+                        <input id="discountSlider" type="text"
+                               data-slider-min="0" data-slider-max="100" data-slider-step="1"
+                               data-slider-value="[@sliderFromDiscount.ToString(System.Globalization.CultureInfo.InvariantCulture),@sliderToDiscount.ToString(System.Globalization.CultureInfo.InvariantCulture)]" />
+                        <input type="hidden" id="fromDiscount" name="fromDiscount" value="@ViewBag.FilterInfo.FromDiscount" />
+                        <input type="hidden" id="toDiscount" name="toDiscount" value="@ViewBag.FilterInfo.ToDiscount" />
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" name="op" value="search-do"><i class="bi bi-funnel"></i> Áp dụng</button>
+                    <button type="submit" class="btn btn-primary" name="op" value="search-clear"><i class="bi bi-x-circle"></i> Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

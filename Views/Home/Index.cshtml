@@ -1,0 +1,159 @@
+﻿@using AppleZone.Helper
+@model PaginatedList<Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="hero-banner">
+    <h1>AppleZone</h1>
+    <p>Chính hãng · Giá tốt · Giao nhanh</p>
+</div>
+
+<div class="container">
+    <h2 class="my-4">Products</h2>
+    <div class="row mb-3 align-items-center">
+            <div class="col-sm-8">
+                <form method="get" asp-action="Index" class="d-flex" style="max-width: 500px;">
+                    <input type="hidden" name="categoryId" value="@ViewBag.FilterInfo.CategoryId" />
+                    <input type="hidden" name="fromPrice" value="@ViewBag.FilterInfo.FromPrice" />
+                    <input type="hidden" name="toPrice" value="@ViewBag.FilterInfo.ToPrice" />
+                    <input type="hidden" name="fromDiscount" value="@ViewBag.FilterInfo.FromDiscount" />
+                    <input type="hidden" name="toDiscount" value="@ViewBag.FilterInfo.ToDiscount" />
+                    <input type="hidden" name="op" value="search-do" />
+                    <input type="text" name="name" class="form-control me-2" placeholder="Tìm kiếm sản phẩm..." value="@ViewBag.FilterInfo.Name" />
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                </form>
+            </div>
+            <div class="col-sm-4">
+                <div class="float-sm-end" style="margin-bottom: 10px">
+                    <a href="#" class="btn btn-outline-light text-dark" data-bs-toggle="modal"
+                       data-bs-target="#modalFilter" title="Bộ lọc nâng cao">
+                        <i class="bi bi-funnel"></i> Filter
+                    </a>
+                    <a href="#" class="btn btn-outline-light text-dark" data-bs-toggle="modal"
+                       data-bs-target="#modalSorting" title="Sắp xếp sản phẩm">
+                        <i class="bi bi-arrow-down-up"></i> Sort
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? "/images/no-image.svg" : item.ImageUrl)" onerror="this.onerror=null;this.src='/images/no-image.svg';" class="card-img-top" alt="@item.Name">
+                    <span class="discount-badge">@item.Discount.ToString("P0")</span>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-dark">@item.Name</a>
+                        </h5>
+                        <p class="card-text">
+                            <strong>Old price:</strong> <strike>@(item.Price.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</strike><br />
+                            <strong>New price:</strong> <span style="color:red; font-size: 24px;">@((item.Price * (1 - item.Discount)).ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</span><br />
+                            <strong>Category:</strong> @item.Category.Name<br />
+                            <strong>Brand:</strong> @item.Brand<br />
+                            <strong>Size:</strong> @item.Origin<br />
+                            <strong>Color:</strong> @item.Guarantee<br />
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-eye"></i> Chi tiết</a>
+                            <a class="btn btn-primary" asp-controller="Cart" asp-action="Add" asp-route-id="@item.Id"><i class="bi bi-cart-plus"></i> Add to Cart</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        </div>
+    </div>
+
+@await Html.PartialAsync("_NavigationButtons2")
+@await Html.PartialAsync("_SortingDialog")
+@await Html.PartialAsync("_FilterDialog")
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".go").click(function () {
+                //lay value cua page-index
+                var pageIndex = $("#page-index").val();
+                //tao url
+                url = `/?pageIndex=${pageIndex}`
+                //cap nhat href bang url
+                $(this).attr("href", url);
+            });
+
+            function formatCurrency(v) {
+                return Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            }
+
+            var priceSlider = $("#priceSlider").slider();
+            function updatePriceHidden(value) {
+                $("#fromPrice").val(value[0]);
+                $("#toPrice").val(value[1]);
+                $("#priceRangeLabel").text(formatCurrency(value[0]) + " - " + formatCurrency(value[1]));
+            }
+            updatePriceHidden(priceSlider.slider('getValue'));
+            priceSlider.on('change', function (e) {
+                updatePriceHidden(e.value.newValue);
+            });
+
+            var discountSlider = $("#discountSlider").slider();
+            function updateDiscountHidden(value) {
+                $("#fromDiscount").val(value[0] / 100);
+                $("#toDiscount").val(value[1] / 100);
+                $("#discountRangeLabel").text(value[0] + "% - " + value[1] + "%");
+            }
+            updateDiscountHidden(discountSlider.slider('getValue'));
+            discountSlider.on('change', function (e) {
+                updateDiscountHidden(e.value.newValue);
+            });
+        });
+    </script>
+}
+<style>
+    .hero-banner {
+        background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/hero-bg.png') center/cover no-repeat;
+        color: #fff;
+        text-align: center;
+        padding: 80px 20px;
+        margin-bottom: 10px;
+    }
+
+    .hero-banner h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+
+    .hero-banner p {
+        font-size: 1.1rem;
+        color: #d2d2d7;
+        margin: 0;
+    }
+
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+        white-space: nowrap;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+</style>

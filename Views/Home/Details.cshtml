@@ -1,0 +1,45 @@
+@model Product
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container my-4">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+    </a>
+    <div class="row">
+        <div class="col-md-5">
+            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/no-image.svg" : Model.ImageUrl)" onerror="this.onerror=null;this.src='/images/no-image.svg';" class="img-fluid rounded" alt="@Model.Name">
+        </div>
+        <div class="col-md-7">
+            <h2>@Model.Name</h2>
+            <p class="text-muted">@Model.Category.Name</p>
+
+            <p>
+                <strong>Giá cũ:</strong> <strike>@(Model.Price.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</strike><br />
+                <strong>Giá mới:</strong> <span style="color:red; font-size: 24px;">@((Model.Price * (1 - Model.Discount)).ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</span>
+                (giảm @Model.Discount.ToString("P0"))
+            </p>
+
+            <p>
+                <strong>Thương hiệu:</strong> @Model.Brand<br />
+                <strong>Xuất xứ:</strong> @Model.Origin<br />
+                <strong>Bảo hành:</strong> @Model.Guarantee<br />
+                <strong>Tồn kho:</strong> @Model.StockQuantity
+            </p>
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="mt-3">
+                    <h5>Mô tả sản phẩm</h5>
+                    <p style="white-space: pre-line;">@Model.Description</p>
+                </div>
+            }
+
+            <a class="btn btn-primary mt-3" asp-controller="Cart" asp-action="Add" asp-route-id="@Model.Id">
+                <i class="bi bi-cart-plus"></i> Add to Cart
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+﻿<!-- The Modal -->
+<div class="modal" id="modalSorting">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form>
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title"><i class="bi bi-arrow-down-up"></i> Sắp xếp sản phẩm</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="">Order by:</label>
+                        <select name="orderBy" class="form-control" asp-items="ViewBag.FieldList"></select>
+                    </div>
+                    <div class="form-group mt-3">
+                        <input type="radio" name="orderType" value="ASC"  @(ViewBag.SortInfo.OrderType=="ASC"?"checked":"")><i class="bi bi-sort-alpha-down"></i> Ascending
+                        <input type="radio" name="orderType" value="DESC" @(ViewBag.SortInfo.OrderType=="DESC" ?"checked":"")><i class="bi bi-sort-alpha-down-alt"></i> Descending
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" name="op" value="sort-do"><i class="bi bi-arrow-down-up"></i> Sort</button>
+                    <button type="submit" class="btn btn-primary" name="op" value="sort-clear"><i class="bi bi-x-circle"></i> Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
