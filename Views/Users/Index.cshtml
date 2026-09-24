@@ -1,0 +1,29 @@
+@model List<AppleZone.Models.Account.UserRoleViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý phân quyền";
+}
+
+<h1>Quản lý phân quyền User</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Tên</th>
+            <th>Role hiện tại</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var u in Model)
+{
+        <tr>
+            <td>@u.Email</td>
+            <td>@u.Name</td>
+            <td>@(u.CurrentRoles.Count > 0 ? string.Join(", ", u.CurrentRoles) : "(chưa có role)")</td>
+            <td><a asp-action="EditRoles" asp-route-id="@u.UserId" class="btn btn-sm btn-primary">Sửa quyền</a></td>
+        </tr>
+}
+    </tbody>
+</table>
