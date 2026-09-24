@@ -1,0 +1,155 @@
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h1 class="my-4">Dashboard</h1>
+
+@if (ViewBag.WarningMessage != null)
+{
+    <div class="alert alert-warning">@ViewBag.WarningMessage</div>
+}
+
+<form method="get" asp-action="Index" class="d-flex gap-2 mb-4 align-items-end">
+    <div>
+        <label class="form-label mb-0">Năm</label>
+        <select name="year" class="form-control">
+            <option value="">--- Tất cả ---</option>
+            @foreach (var y in Model.AvailableYears)
+            {
+                <option value="@y" selected="@(Model.SelectedYear == y)">@y</option>
+            }
+        </select>
+    </div>
+    <div>
+        <label class="form-label mb-0">Tháng</label>
+        <select name="month" class="form-control">
+            <option value="">--- Tất cả ---</option>
+            @for (int m = 1; m <= 12; m++)
+            {
+                <option value="@m" selected="@(Model.SelectedMonth == m)">Tháng @m</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Xem</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Tất cả thời gian</a>
+</form>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <h6 class="card-title">Tổng doanh thu</h6>
+                <p class="card-text fs-4 fw-bold">@Model.TotalRevenue.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</p>
+                <small>Không tính đơn đã hủy</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title">Khách hàng</h6>
+                <p class="card-text fs-4 fw-bold">@Model.TotalCustomers</p>
+                <small>Đã từng đặt hàng</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title">Sản phẩm</h6>
+                <p class="card-text fs-4 fw-bold">@Model.TotalProducts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="card-title">Danh mục</h6>
+                <p class="card-text fs-4 fw-bold">@Model.TotalCategories</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Đơn hàng theo trạng thái</h4>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-warning h-100">
+            <div class="card-body">
+                <h6 class="card-title text-warning">Chờ xử lý (Pending)</h6>
+                <p class="card-text fs-4 fw-bold">@Model.PendingCount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info h-100">
+            <div class="card-body">
+                <h6 class="card-title text-info">Đang giao (Shipping)</h6>
+                <p class="card-text fs-4 fw-bold">@Model.ShippingCount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success h-100">
+            <div class="card-body">
+                <h6 class="card-title text-success">Đã giao (Delivered)</h6>
+                <p class="card-text fs-4 fw-bold">@Model.DeliveredCount</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-danger h-100">
+            <div class="card-body">
+                <h6 class="card-title text-danger">Đã hủy (Cancelled)</h6>
+                <p class="card-text fs-4 fw-bold">@Model.CancelledCount</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <h4>Sản phẩm bán chạy nhất</h4>
+        @if (!Model.TopProducts.Any())
+        {
+            <p class="text-muted">Chưa có dữ liệu bán hàng.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr><th>Sản phẩm</th><th class="text-end">Đã bán</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.TopProducts)
+                    {
+                        <tr><td>@p.Name</td><td class="text-end">@p.TotalSold</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+    <div class="col-md-6">
+        <h4>Sản phẩm sắp hết hàng <small class="text-muted fs-6">(tồn kho hiện tại, không theo bộ lọc thời gian)</small></h4>
+        @if (!Model.LowStockProducts.Any())
+        {
+            <p class="text-muted">Không có sản phẩm nào sắp hết hàng.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr><th>Sản phẩm</th><th class="text-end">Tồn kho</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.LowStockProducts)
+                    {
+                        <tr><td>@p.Name</td><td class="text-end text-danger fw-bold">@p.StockQuantity</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
